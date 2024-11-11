@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/d1f4af75-a7e5-46e6-9e30-ed0ebff6eda6/resourceGroups/RG_Playground_Messaging/providers/Microsoft.Web/sites/emailapi",
+    "appService.deploySubpath": "bin/Publish"
+}

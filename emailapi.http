@@ -1,0 +1,12 @@
+@host = emailapi-gvhteyadhte5gahm.westeurope-01.azurewebsites.net
+@api = emails
+@endpoint = send
+
+POST https://{{host}}/{{api}}/{{endpoint}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "recipient": "info@authoritypartners.com",
+    "subject": "A Test Message",
+    "body": "This message has sent to test the system."
+}

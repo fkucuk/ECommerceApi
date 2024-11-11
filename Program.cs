@@ -1,10 +1,15 @@
 using NSwag.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Azure.ServiceBus;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+var serviceBusConnectionString = builder.Configuration.GetValue<string>("AzureServiceBus:ConnectionString");
+var queueClient = new QueueClient(serviceBusConnectionString, "emailqueue");
+builder.Services.AddSingleton(queueClient);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>

@@ -1,6 +1,16 @@
+using Microsoft.Azure.ServiceBus;
+using System.Text;
+using System.Text.Json;
 
 public class EmailService : IEmailService
 {
+    private readonly QueueClient _queueClient;
+
+    public EmailService(QueueClient queueClient)
+    {
+        _queueClient = queueClient;
+    }
+
     public async Task<Email> GetEmail(Guid id)
     {
         throw new NotImplementedException();
@@ -13,7 +23,10 @@ public class EmailService : IEmailService
                                     sendEmailRequest.Subject,
                                     sendEmailRequest.Body);
 
-        await Task.Delay(new Random().Next(0, 5000));
+        var messageBody = JsonSerializer.Serialize(sendEmailRequest);
+        var message = new Message(Encoding.UTF8.GetBytes(messageBody));
+
+        await _queueClient.SendAsync(message);
 
         return emailItem;
     }

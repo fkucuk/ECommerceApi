@@ -5,4 +5,8 @@ public class Email {
     public string Body { get; set; }
     public string? Secret { get; set; }
 
+    public Email(Guid id, string recipient, string subject, string body) =>
+    (Id, Recipient, Subject, Body) = (id, recipient, subject, body);
+    
+
 }

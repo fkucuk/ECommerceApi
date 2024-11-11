@@ -6,9 +6,12 @@ public class EmailService : IEmailService
         throw new NotImplementedException();
     }
 
-    public async Task<Email> SendEmail(Email emailItem)
+    public async Task<Email> SendEmail(SendEmailRequest sendEmailRequest)
     {
-        emailItem.Id = Guid.NewGuid();
+        var emailItem = new Email(Guid.NewGuid(),
+                                    sendEmailRequest.Recipient,
+                                    sendEmailRequest.Subject,
+                                    sendEmailRequest.Body);
 
         await Task.Delay(new Random().Next(0, 5000));
 

@@ -45,14 +45,7 @@ static async Task<IResult> GetEmail(Guid id, IEmailService service)
 
 static async Task<IResult> SendEmail(SendEmailRequest sendEmailRequest, IEmailService service)
 {
-    var emailItem = new Email
-    {
-        Recipient = sendEmailRequest.Recipient,
-        Subject = sendEmailRequest.Subject,
-        Body = sendEmailRequest.Body
-    };
-
-    emailItem = await service.SendEmail(emailItem);
+    var emailItem = await service.SendEmail(sendEmailRequest);
 
     var response = new EmailItemDTO(emailItem);
 

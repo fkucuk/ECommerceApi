@@ -1,15 +1,10 @@
-using NSwag.AspNetCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Azure.ServiceBus;
+using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-
 var serviceBusConnectionString = builder.Configuration.GetValue<string>("AzureServiceBus:ConnectionString");
-var queueClient = new QueueClient(serviceBusConnectionString, "emailqueue");
-builder.Services.AddSingleton(queueClient);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
@@ -35,24 +30,26 @@ if (app.Environment.IsDevelopment())
 
 RouteGroupBuilder todoItems = app.MapGroup("/emails");
 
-todoItems.MapGet("/{id}", GetEmail);
-todoItems.MapPost("/send", SendEmail);
+todoItems.MapPost("/send", QueueEmail);
 
 app.Run();
 
-static async Task<IResult> GetEmail(Guid id, IEmailService service)
+
+static async Task<IResult> QueueEmail (SendEmailRequest sendEmailRequest)
 {
-    return await service.GetEmail(id)
-        is Email email
-            ? TypedResults.Ok(new EmailItemDTO(email))
-            : TypedResults.NotFound();
-}
+    string queueName = "emails";
 
-static async Task<IResult> SendEmail(SendEmailRequest sendEmailRequest, IEmailService service)
-{
-    var emailItem = await service.SendEmail(sendEmailRequest);
+    var payload = JsonSerializer.Serialize(sendEmailRequest);
 
-    var response = new EmailItemDTO(emailItem);
+    await using ServiceBusClient client = new("***");
 
-    return TypedResults.Created($"/emails/{response.Id}", response);
+    var sender = client.CreateSender(queueName);
+
+    var messageId = Guid.NewGuid().ToString();
+
+    var message = new ServiceBusMessage(payload) { ContentType = "application/json", MessageId = messageId};
+
+    await sender.SendMessageAsync(message);
+
+    return TypedResults.Created($"/emails/{messageId}"); 
 }
